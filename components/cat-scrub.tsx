@@ -26,7 +26,6 @@ import GeocodingStep from "./steps/4-geocoding"
 import OccConstCodingStep from "./steps/5-occ-const-coding"
 import OtherModifiersStep from "./steps/6-other-modifiers"
 import CatnetModifiersStep from "./steps/7-catnet-modifiers"
-import CatnetModifiersStep6 from "./steps/6-catnet-modifiers"
 import ExposureStep from "./steps/8-exposure"
 import HazardAnalysisStep from "./steps/9-hazard-analysis"
 import DataSummaryStep from "./steps/10-data-summary"
@@ -86,12 +85,11 @@ const steps: Step[] = [
   { id: 3, name: "Geocoding" },
   { id: 4, name: "Occupancy & Construction Coding" },
   { id: 5, name: "Other Modifiers Coding" },
-  { id: 6, name: "CATNET Modifiers (Primary)" },
-  { id: 7, name: "CATNET Modifiers (Secondary)" },
-  { id: 8, name: "Exposure" },
-  { id: 9, name: "Hazard & Geospatial Analysis" },
-  { id: 10, name: "Data Summary" },
-  { id: 11, name: "Generate Output" },
+  { id: 6, name: "CATNET Modifiers" },
+  { id: 7, name: "Exposure" },
+  { id: 8, name: "Hazard & Geospatial Analysis" },
+  { id: 9, name: "Data Summary" },
+  { id: 10, name: "Generate Output" },
 ]
 
 export default function CatScrub() {
@@ -338,19 +336,7 @@ export default function CatScrub() {
     if (!state.processedData) return
     setState((prev) => ({
       ...prev,
-      processingLog: [...prev.processingLog, "Primary modifiers coded. Processing CATNET modifiers (Primary)..."],
-    }))
-    handleAction(processCatnetModifiers, state.processedData, state.fieldMapping)
-  }
-
-  const handleCatnetModifiers2 = () => {
-    if (!state.processedData) return
-    setState((prev) => ({
-      ...prev,
-      processingLog: [
-        ...prev.processingLog,
-        "CATNET modifiers (Primary) processed. Processing CATNET modifiers (Secondary)...",
-      ],
+      processingLog: [...prev.processingLog, "Primary modifiers coded. Processing CATNET modifiers..."],
     }))
     handleAction(processCatnetModifiers, state.processedData, state.fieldMapping)
   }
@@ -469,15 +455,6 @@ export default function CatScrub() {
         )
       case 6:
         return (
-          <CatnetModifiersStep6
-            data={state.processedData}
-            onNext={handleCatnetModifiers2}
-            isPending={isPending}
-            onAmendmentApplied={handleAmendmentApplied}
-          />
-        )
-      case 7:
-        return (
           <CatnetModifiersStep
             data={state.processedData}
             onNext={handleExposure}
@@ -485,7 +462,7 @@ export default function CatScrub() {
             onAmendmentApplied={handleAmendmentApplied}
           />
         )
-      case 8:
+      case 7:
         return (
           <ExposureStep
             data={state.processedData}
@@ -494,11 +471,11 @@ export default function CatScrub() {
             onAmendmentApplied={handleAmendmentApplied}
           />
         )
-      case 9:
+      case 8:
         return <HazardAnalysisStep data={state.processedData} onNext={handleDataSummary} isPending={isPending} />
-      case 10:
+      case 9:
         return <DataSummaryStep data={state.processedData} onNext={handleGenerateOutput} isPending={isPending} />
-      case 11:
+      case 10:
         const originalMappedHeaders = Object.values(state.fieldMapping)
         const additionalHeaders = originalMappedHeaders.filter((h) => !OUTPUT_COLUMN_SEQUENCE.includes(h))
         const finalHeaders = [...OUTPUT_COLUMN_SEQUENCE, ...additionalHeaders]
