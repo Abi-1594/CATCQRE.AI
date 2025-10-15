@@ -15,7 +15,7 @@ import {
 import type { AppState, FieldMapping, Step, BusinessRules } from "@/lib/types"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { AlertCircle, CheckCircle, BrainCircuit, Trash2, BarChart2, Brain, ArrowLeft } from "lucide-react"
+import { AlertCircle, CheckCircle, BrainCircuit, Trash2, BarChart2, ArrowLeft, Settings } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
 
@@ -45,7 +45,6 @@ import {
 } from "@/lib/cache"
 import { OUTPUT_COLUMN_SEQUENCE } from "@/lib/constants"
 import AgentStatusIndicator from "./agent-status-indicator"
-import AutonomousWorkflowDashboard from "./autonomous-workflow-dashboard"
 import PopupAIAssistant from "./popup-ai-assistant"
 
 const initialAppState: AppState = {
@@ -551,9 +550,9 @@ export default function CatScrub() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="workflow">Workflow</TabsTrigger>
-              <TabsTrigger value="autonomous">
-                <Brain className="w-4 h-4 mr-2" />
-                AI Dashboard
+              <TabsTrigger value="business-rules">
+                <Settings className="w-4 h-4 mr-2" />
+                Business Rules
               </TabsTrigger>
               <TabsTrigger value="analysis">
                 <BarChart2 className="w-4 h-4 mr-2" />
@@ -565,15 +564,19 @@ export default function CatScrub() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="autonomous">
-              <AutonomousWorkflowDashboard
-                steps={workflowSteps}
-                currentStep={state.currentStep}
-                onStepClick={(stepId) => console.log("Step clicked:", stepId)}
-                onPauseResume={() => setWorkflowPaused(!workflowPaused)}
-                onConfigureStep={(stepId) => console.log("Configure step:", stepId)}
-                isPaused={workflowPaused}
-              />
+            <TabsContent value="business-rules">
+              <div className="bg-card rounded-xl shadow-sm border border-border p-6">
+                <h2 className="text-2xl font-bold text-foreground mb-4">Configure Business Rules</h2>
+                <p className="text-muted-foreground mb-6">
+                  Adjust validation thresholds and default values for data processing.
+                </p>
+                <BusinessRulesStep
+                  businessRules={state.businessRules}
+                  onRulesUpdate={(rules) => setState((prev) => ({ ...prev, businessRules: rules }))}
+                  onNext={handleBusinessRules}
+                  isPending={isPending}
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="workflow">
