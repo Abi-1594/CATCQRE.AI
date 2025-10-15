@@ -82,7 +82,7 @@ export default function HazardAnalysisStep({ data, onNext, isPending }: HazardAn
       </ScrollArea>
 
       <Button onClick={onNext} disabled={isPending} className="mt-8 w-full sm:w-auto">
-        {isPending ? "Processing..." : "Next: Generate Output"}
+        {isPending ? "Processing..." : "Next: Data Summary"}
       </Button>
     </div>
   )
