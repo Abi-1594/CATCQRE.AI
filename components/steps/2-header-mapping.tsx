@@ -537,7 +537,7 @@ export default function HeaderMappingStep({ headers, data, onMap, isPending }: H
       </div>
 
       <Button onClick={() => onMap(mapping)} disabled={isPending} className="mt-8 w-full sm:w-auto">
-        {isPending ? "Processing..." : "Next: Configure Business Rules"}
+        {isPending ? "Processing..." : "Next: Geocoding"}
       </Button>
     </div>
   )
