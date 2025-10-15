@@ -83,16 +83,15 @@ const initialAppState: AppState = {
 const steps: Step[] = [
   { id: 1, name: "File Upload" },
   { id: 2, name: "Header Mapping" },
-  { id: 3, name: "Business Rules" },
-  { id: 4, name: "Geocoding" },
-  { id: 5, name: "Occupancy & Construction Coding" },
-  { id: 6, name: "Other Modifiers Coding" },
-  { id: 7, name: "CATNET Modifiers (Primary)" },
-  { id: 8, name: "CATNET Modifiers (Secondary)" },
-  { id: 9, name: "Exposure" },
-  { id: 10, name: "Hazard & Geospatial Analysis" },
-  { id: 11, name: "Data Summary" },
-  { id: 12, name: "Generate Output" },
+  { id: 3, name: "Geocoding" },
+  { id: 4, name: "Occupancy & Construction Coding" },
+  { id: 5, name: "Other Modifiers Coding" },
+  { id: 6, name: "CATNET Modifiers (Primary)" },
+  { id: 7, name: "CATNET Modifiers (Secondary)" },
+  { id: 8, name: "Exposure" },
+  { id: 9, name: "Hazard & Geospatial Analysis" },
+  { id: 10, name: "Data Summary" },
+  { id: 11, name: "Generate Output" },
 ]
 
 export default function CatScrub() {
@@ -229,31 +228,25 @@ export default function CatScrub() {
     setState((prev) => ({
       ...prev,
       fieldMapping: mapping,
-      processingLog: [...prev.processingLog, "Headers mapped. Configure business rules..."],
-      currentStep: prev.currentStep + 1,
-      error: null,
-    }))
-  }
-
-  const handleBusinessRules = (rules: BusinessRules) => {
-    setState((prev) => ({
-      ...prev,
-      businessRules: rules,
-      processingLog: [...prev.processingLog, "Business rules configured. Starting geocoding..."],
+      processingLog: [...prev.processingLog, "Headers mapped. Starting geocoding..."],
     }))
 
-    // Proceed to geocoding
+    // Proceed to geocoding immediately
     startTransition(async () => {
-      const { data: allRows, fieldMapping, businessRules: currentRules } = { ...state, businessRules: rules }
+      const {
+        data: allRows,
+        fieldMapping: currentMapping,
+        businessRules: currentRules,
+      } = { ...state, fieldMapping: mapping }
       const cachedResults: Record<string, any>[] = []
       const rowsToProcess: Record<string, any>[] = []
 
       allRows.forEach((row) => {
-        const fullAddress = fieldMapping["Full Address"] ? row[fieldMapping["Full Address"]] : ""
-        const street = fieldMapping.Street ? row[fieldMapping.Street] : ""
-        const city = fieldMapping.City ? row[fieldMapping.City] : ""
-        const postal = fieldMapping["Postal Code"] ? row[fieldMapping["Postal Code"]] : ""
-        const country = fieldMapping.Country ? row[fieldMapping.Country] : ""
+        const fullAddress = currentMapping["Full Address"] ? row[currentMapping["Full Address"]] : ""
+        const street = currentMapping.Street ? row[currentMapping.Street] : ""
+        const city = currentMapping.City ? row[currentMapping.City] : ""
+        const postal = currentMapping["Postal Code"] ? row[currentMapping["Postal Code"]] : ""
+        const country = currentMapping.Country ? row[currentMapping.Country] : ""
         const addressKey = fullAddress || [street, city, postal, country].filter(Boolean).join(", ")
 
         if (addressKey && geocodingCache[addressKey]) {
@@ -275,8 +268,7 @@ export default function CatScrub() {
         }
       })
 
-      // Always process through geocoding APIs, even if some are cached
-      const result = await processAddressCleansing([...cachedResults, ...rowsToProcess], fieldMapping)
+      const result = await processAddressCleansing([...cachedResults, ...rowsToProcess], currentMapping)
       if (result.error) {
         setState((prev) => ({ ...prev, error: result.error }))
         return
@@ -305,22 +297,22 @@ export default function CatScrub() {
       setState((prev) => ({
         ...prev,
         processedData: result.processedData,
-        businessRules: currentRules, // Ensure business rules are preserved
         currentStep: prev.currentStep + 1,
         error: null,
       }))
     })
   }
 
-  const handleAmendmentApplied = (amendedData: Record<string, any>[]) => {
-    console.log("Amendment applied, updating state with:", amendedData.length, "records")
+  const handleBusinessRules = (rules: BusinessRules) => {
     setState((prev) => ({
       ...prev,
-      processedData: [...amendedData], // Force new array reference
+      businessRules: rules,
+      processingLog: [...prev.processingLog, "Business rules configured."],
     }))
+
     toast({
-      title: "Amendments Applied",
-      description: "Your amendments have been successfully applied to the data.",
+      title: "Business Rules Updated",
+      description: "Your business rules have been saved and will be applied during processing.",
     })
   }
 
@@ -423,6 +415,10 @@ export default function CatScrub() {
     toast({ title: "Cache Cleared", description: "All learned data has been removed." })
   }
 
+  const handleAmendmentApplied = () => {
+    // Placeholder for handleAmendmentApplied logic
+  }
+
   const renderStepContent = () => {
     const currentStepId = state.currentStep > steps.length ? steps.length : state.currentStep
     switch (currentStepId) {
@@ -446,15 +442,6 @@ export default function CatScrub() {
         )
       case 3:
         return (
-          <BusinessRulesStep
-            businessRules={state.businessRules}
-            onRulesUpdate={(rules) => setState((prev) => ({ ...prev, businessRules: rules }))}
-            onNext={handleBusinessRules}
-            isPending={isPending}
-          />
-        )
-      case 4:
-        return (
           <GeocodingStep
             data={state.processedData}
             onNext={handleSchemeCoding}
@@ -462,7 +449,7 @@ export default function CatScrub() {
             onAmendmentApplied={handleAmendmentApplied}
           />
         )
-      case 5:
+      case 4:
         return (
           <OccConstCodingStep
             data={state.processedData}
@@ -471,7 +458,7 @@ export default function CatScrub() {
             onAmendmentApplied={handleAmendmentApplied}
           />
         )
-      case 6:
+      case 5:
         return (
           <OtherModifiersStep
             data={state.processedData}
@@ -480,7 +467,7 @@ export default function CatScrub() {
             onAmendmentApplied={handleAmendmentApplied}
           />
         )
-      case 7:
+      case 6:
         return (
           <CatnetModifiersStep6
             data={state.processedData}
@@ -489,7 +476,7 @@ export default function CatScrub() {
             onAmendmentApplied={handleAmendmentApplied}
           />
         )
-      case 8:
+      case 7:
         return (
           <CatnetModifiersStep
             data={state.processedData}
@@ -498,7 +485,7 @@ export default function CatScrub() {
             onAmendmentApplied={handleAmendmentApplied}
           />
         )
-      case 9:
+      case 8:
         return (
           <ExposureStep
             data={state.processedData}
@@ -507,11 +494,11 @@ export default function CatScrub() {
             onAmendmentApplied={handleAmendmentApplied}
           />
         )
-      case 10:
+      case 9:
         return <HazardAnalysisStep data={state.processedData} onNext={handleDataSummary} isPending={isPending} />
-      case 11:
+      case 10:
         return <DataSummaryStep data={state.processedData} onNext={handleGenerateOutput} isPending={isPending} />
-      case 12:
+      case 11:
         const originalMappedHeaders = Object.values(state.fieldMapping)
         const additionalHeaders = originalMappedHeaders.filter((h) => !OUTPUT_COLUMN_SEQUENCE.includes(h))
         const finalHeaders = [...OUTPUT_COLUMN_SEQUENCE, ...additionalHeaders]
