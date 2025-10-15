@@ -78,6 +78,8 @@ export interface Step {
 export interface AppState {
   currentStep: number
   file: File | null
+  accountName: string
+  lineOfBusiness: string
   originalHeaders: string[]
   data: Record<string, any>[]
   fieldMapping: FieldMapping

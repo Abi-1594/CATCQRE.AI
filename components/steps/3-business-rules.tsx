@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { AlertTriangle, Target, DollarSign } from "lucide-react"
 import type { BusinessRules } from "@/lib/types"
-import { accountSelectionOccupancies } from "@/lib/occupancy-account-selection"
 
 interface BusinessRulesStepProps {
   businessRules: BusinessRules
@@ -39,11 +38,6 @@ export default function BusinessRulesStep({ businessRules, onRulesUpdate, onNext
     )
   }
 
-  const getSelectedOccupancyDescription = () => {
-    const selected = accountSelectionOccupancies.find((occ) => occ.code === rules.defaultOccupancyForMisc)
-    return selected ? selected.description : ""
-  }
-
   return (
     <div className="w-full max-w-5xl mx-auto">
       <div className="text-center mb-8">
@@ -54,40 +48,6 @@ export default function BusinessRulesStep({ businessRules, onRulesUpdate, onNext
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Default Occupancy Selection */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
-              Default Occupancy Selection
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div>
-              <Label className="text-sm font-medium">Default Occupancy for Misc/Vacant/Blank</Label>
-              <Select
-                value={rules.defaultOccupancyForMisc}
-                onValueChange={(value) => handleRuleChange("defaultOccupancyForMisc", value)}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {accountSelectionOccupancies.map((occ) => (
-                    <SelectItem key={occ.code} value={occ.code}>
-                      {occ.scheme} {occ.code} - {occ.description}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-gray-500 mt-1">Selected: {getSelectedOccupancyDescription()}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                Applied to occupancies containing: misc, miscellaneous, vacant, blank, empty, unknown, other, n/a, tbd
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Confidence Thresholds */}
         <Card>
           <CardHeader>
@@ -354,5 +314,5 @@ const defaultBusinessRules: BusinessRules = {
   maxContentsValue: 50000000,
   maxBIValue: 25000000,
   invalidValueAction: "none",
-  defaultOccupancyForMisc: "37", // Default to General Commercial
+  defaultOccupancyForMisc: "37",
 }

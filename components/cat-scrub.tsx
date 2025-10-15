@@ -51,6 +51,8 @@ import PopupAIAssistant from "./popup-ai-assistant"
 const initialAppState: AppState = {
   currentStep: 1,
   file: null,
+  accountName: "",
+  lineOfBusiness: "Property",
   originalHeaders: [],
   data: [],
   fieldMapping: {},
@@ -203,10 +205,13 @@ export default function CatScrub() {
     }
   }
 
-  const handleFileUpload = (file: File) => {
+  const handleFileUpload = (file: File, accountName: string, lineOfBusiness: string, businessRules: BusinessRules) => {
     setState((prev) => ({
       ...prev,
       file,
+      accountName,
+      lineOfBusiness,
+      businessRules,
       processingLog: [...prev.processingLog, "File selected. Processing..."],
     }))
     handleAction(processFile, file)
@@ -423,7 +428,14 @@ export default function CatScrub() {
     const currentStepId = state.currentStep > steps.length ? steps.length : state.currentStep
     switch (currentStepId) {
       case 1:
-        return <FileUploadStep onFileUpload={handleFileUpload} isPending={isPending} />
+        return (
+          <FileUploadStep
+            onFileUpload={handleFileUpload}
+            isPending={isPending}
+            businessRules={state.businessRules}
+            onRulesUpdate={(rules) => setState((prev) => ({ ...prev, businessRules: rules }))}
+          />
+        )
       case 2:
         return (
           <HeaderMappingStep
